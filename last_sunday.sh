@@ -18,17 +18,19 @@ name=${2:-$USER} # Второй аргумент - имя пользовател
 life_expectancy=80     # Ожидаемая продолжительность жизни в годах
 last_year_index=$((life_expectancy - 1))
 
-case "$(uname)" in
-  "Linux")
-    birth_year=$(date -d "$birthdate" +"%Y")
-    birth_timestamp=$(date -d "$birthdate" +%s)
-    ;;
-  "Darwin")
-    birth_year=$(date -j -f "%Y-%m-%d" "$birthdate" +"%Y")
-    birth_timestamp=$(date -j -f "%Y-%m-%d" "$birthdate" +%s)
-    ;;
-  *) echo "Unsupported OS"; exit 1 ;;
-esac
+date --version >/dev/null 2>&1
+if [ $? -eq 0 ]; then
+  # GNU
+  birth_year=$(date -d "$birthdate" +"%Y")
+  birth_timestamp=$(date -d "$birthdate" +%s)
+elif [ $? -eq 1 ]; then
+  # BSD
+  birth_year=$(date -j -f "%Y-%m-%d" "$birthdate" +"%Y")
+  birth_timestamp=$(date -j -f "%Y-%m-%d" "$birthdate" +%s)
+else
+  # Unsupported
+  echo "Unsupported OS"; exit 1
+fi
 
 current_year=$(date +"%Y")
 current_timestamp=$(date +%s)
